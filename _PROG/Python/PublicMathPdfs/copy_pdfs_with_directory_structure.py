@@ -1,6 +1,7 @@
 import os
 import shutil
-from pathlib import Path
+import tkinter as tk
+from tkinter import filedialog, messagebox
 
 def scan_for_pdfs(source_dir):
     """Scan the source directory for all PDF files and their relative paths."""
@@ -24,7 +25,7 @@ def copy_pdfs_with_structure(source_dir, target_dir):
     pdf_files = scan_for_pdfs(source_dir)
 
     if not pdf_files:
-        print(f"No PDF files found in {source_dir}.")
+        messagebox.showinfo("Info", f"No PDF files found in {source_dir}.")
         return
 
     for rel_path, pdf_file in pdf_files:
@@ -38,20 +39,35 @@ def copy_pdfs_with_structure(source_dir, target_dir):
         shutil.copy2(source_file_path, target_file_path)
         print(f"Copied: {source_file_path} -> {target_file_path}")
 
-    print("All PDF files copied successfully!")
+    messagebox.showinfo("Success", "All PDF files copied successfully!")
+
+def select_directory(title):
+    """Open a directory selection dialog and return the selected path."""
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    dir_path = filedialog.askdirectory(title=title)
+    return dir_path
 
 if __name__ == "__main__":
-    # Example usage
-    source_directory = input("Enter the source directory path (e.g., 'iansurf/Wiskunde'): ").strip()
-    target_directory = input("Enter the target directory path (e.g., 'iansurf/PublicMathPdfs'): ").strip()
+    # Select source directory
+    source_directory = select_directory("Select Source Directory (e.g., iansurf/Wiskunde)")
+    if not source_directory:
+        messagebox.showerror("Error", "No source directory selected.")
+        exit(1)
+
+    # Select target directory
+    target_directory = select_directory("Select Target Directory (e.g., iansurf/PublicMathPdfs)")
+    if not target_directory:
+        messagebox.showerror("Error", "No target directory selected.")
+        exit(1)
 
     # Validate paths
     if not os.path.isdir(source_directory):
-        print(f"Error: Source directory '{source_directory}' does not exist.")
+        messagebox.showerror("Error", f"Source directory '{source_directory}' does not exist.")
         exit(1)
 
     if not os.path.isdir(target_directory):
-        print(f"Error: Target directory '{target_directory}' does not exist.")
+        messagebox.showerror("Error", f"Target directory '{target_directory}' does not exist.")
         exit(1)
 
     copy_pdfs_with_structure(source_directory, target_directory)
