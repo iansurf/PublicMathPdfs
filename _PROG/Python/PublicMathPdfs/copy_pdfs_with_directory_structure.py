@@ -20,7 +20,7 @@ def ensure_directory_structure(target_dir, rel_path):
         os.makedirs(target_path, exist_ok=True)
         print(f"Created directory: {target_path}")
 
-def copy_pdfs_with_structure(source_dir, target_dir):
+def copy_pdfs_with_structure(source_dir, target_dir, overwrite=False):
     """Copy PDF files from source_dir to target_dir, preserving the directory structure."""
     pdf_files = scan_for_pdfs(source_dir)
 
@@ -35,6 +35,14 @@ def copy_pdfs_with_structure(source_dir, target_dir):
         # Ensure the target directory structure exists
         ensure_directory_structure(target_dir, rel_path)
 
+        # Check if the file already exists in the target directory
+        if os.path.exists(target_file_path):
+            if overwrite:
+                print(f"Overwriting existing file: {target_file_path}")
+            else:
+                print(f"Skipping existing file: {target_file_path}")
+                continue
+
         # Copy the PDF file
         shutil.copy2(source_file_path, target_file_path)
         print(f"Copied: {source_file_path} -> {target_file_path}")
@@ -47,6 +55,13 @@ def select_directory(title):
     root.withdraw()  # Hide the main window
     dir_path = filedialog.askdirectory(title=title)
     return dir_path
+
+def ask_overwrite():
+    """Ask the user if they want to overwrite existing files."""
+    root = tk.Tk()
+    root.withdraw()
+    response = messagebox.askyesno("Overwrite Files", "Do you want to overwrite existing PDF files in the target directory?")
+    return response
 
 if __name__ == "__main__":
     # Select source directory
@@ -70,4 +85,7 @@ if __name__ == "__main__":
         messagebox.showerror("Error", f"Target directory '{target_directory}' does not exist.")
         exit(1)
 
-    copy_pdfs_with_structure(source_directory, target_directory)
+    # Ask if the user wants to overwrite existing files
+    overwrite = ask_overwrite()
+
+    copy_pdfs_with_structure(source_directory, target_directory, overwrite)
