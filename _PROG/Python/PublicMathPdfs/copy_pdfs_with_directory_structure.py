@@ -49,43 +49,49 @@ def copy_pdfs_with_structure(source_dir, target_dir, overwrite=False):
 
     messagebox.showinfo("Success", "All PDF files copied successfully!")
 
-def select_directory(title):
+def select_directory(title, root):
     """Open a directory selection dialog and return the selected path."""
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    dir_path = filedialog.askdirectory(title=title)
+    dir_path = filedialog.askdirectory(title=title, parent=root)
     return dir_path
 
-def ask_overwrite():
+def ask_overwrite(root):
     """Ask the user if they want to overwrite existing files."""
-    root = tk.Tk()
-    root.withdraw()
-    response = messagebox.askyesno("Overwrite Files", "Do you want to overwrite existing PDF files in the target directory?")
+    response = messagebox.askyesno("Overwrite Files", "Do you want to overwrite existing PDF files in the target directory?", parent=root)
     return response
 
 if __name__ == "__main__":
-    # Select source directory
-    source_directory = select_directory("Select Source Directory (e.g., iansurf/Wiskunde)")
-    if not source_directory:
-        messagebox.showerror("Error", "No source directory selected.")
-        exit(1)
+    # Create a single Tkinter root window
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
 
-    # Select target directory
-    target_directory = select_directory("Select Target Directory (e.g., iansurf/PublicMathPdfs)")
-    if not target_directory:
-        messagebox.showerror("Error", "No target directory selected.")
-        exit(1)
+    try:
+        # Select source directory
+        source_directory = select_directory("Select Source Directory (e.g., iansurf/Wiskunde)", root)
+        if not source_directory:
+            messagebox.showerror("Error", "No source directory selected.", parent=root)
+            exit(1)
 
-    # Validate paths
-    if not os.path.isdir(source_directory):
-        messagebox.showerror("Error", f"Source directory '{source_directory}' does not exist.")
-        exit(1)
+        # Select target directory
+        target_directory = select_directory("Select Target Directory (e.g., iansurf/PublicMathPdfs)", root)
+        if not target_directory:
+            messagebox.showerror("Error", "No target directory selected.", parent=root)
+            exit(1)
 
-    if not os.path.isdir(target_directory):
-        messagebox.showerror("Error", f"Target directory '{target_directory}' does not exist.")
-        exit(1)
+        # Validate paths
+        if not os.path.isdir(source_directory):
+            messagebox.showerror("Error", f"Source directory '{source_directory}' does not exist.", parent=root)
+            exit(1)
 
-    # Ask if the user wants to overwrite existing files
-    overwrite = ask_overwrite()
+        if not os.path.isdir(target_directory):
+            messagebox.showerror("Error", f"Target directory '{target_directory}' does not exist.", parent=root)
+            exit(1)
 
-    copy_pdfs_with_structure(source_directory, target_directory, overwrite)
+        # Ask if the user wants to overwrite existing files
+        overwrite = ask_overwrite(root)
+
+        copy_pdfs_with_structure(source_directory, target_directory, overwrite)
+
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {e}", parent=root)
+    finally:
+        root.destroy()  # Clean up the Tkinter root window
